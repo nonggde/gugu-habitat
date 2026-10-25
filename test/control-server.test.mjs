@@ -34,3 +34,20 @@ test('control server exposes status and loopback pause/resume controls', async (
 test('control server refuses non-loopback binding', async () => {
   assert.throws(() => createControlServer({ scheduler: schedulerFixture(), channels: { ids: () => [] }, host: '0.0.0.0', port: 0 }), /loopback/);
 });
+
+test('setup mode serves the page and explains missing configuration without starting channels', async () => {
+  const control = await createControlServer({
+    setup: { configured: false, missing: ['GUGU_API_KEY'] },
+    port: 0,
+  });
+  try {
+    const response = await fetch(`http://127.0.0.1:${control.address.port}/api/status`);
+    const status = await response.json();
+    assert.deepEqual(status.setup, { configured: false, missing: ['GUGU_API_KEY'] });
+    assert.equal(status.heartbeat.stopped, true);
+    const action = await fetch(`http://127.0.0.1:${control.address.port}/api/autonomy/resume`, { method: 'POST' });
+    assert.equal(action.status, 409);
+  } finally {
+    await control.close();
+  }
+});

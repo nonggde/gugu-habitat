@@ -127,5 +127,27 @@ if (process.env.GUGU_API_BASE_URL && process.env.GUGU_API_KEY && process.env.GUG
   process.once('SIGINT', () => void shutdown());
   process.once('SIGTERM', () => void shutdown());
 } else {
-  console.info(`Gugu Habitat is scaffolded. Configure ${envFile} to start the local agent core.`);
+  const missing = ['GUGU_API_BASE_URL', 'GUGU_API_KEY', 'GUGU_MODEL']
+    .filter((name) => !String(process.env[name] || '').trim());
+  const hasQq = ['QQBOT_APP_ID', 'QQBOT_APP_SECRET', 'QQBOT_OWNER_ID']
+    .every((name) => String(process.env[name] || '').trim());
+  if (!hasQq && !String(process.env.DOUYIN_OWNER_NAME || '').trim()) {
+    missing.push('QQBOT_APP_ID + QQBOT_APP_SECRET + QQBOT_OWNER_ID or DOUYIN_OWNER_NAME');
+  }
+  const controlEnabled = String(process.env.GUGU_CONTROL_ENABLED ?? 'true').toLowerCase() !== 'false';
+  if (!controlEnabled) {
+    console.error(`Gugu Habitat is not configured. Fill ${envFile}, then run npm start.`);
+    process.exitCode = 1;
+  } else {
+    const controlPort = Math.max(0, Math.min(65_535, Math.floor(numberSetting('GUGU_CONTROL_PORT', 7862))));
+    const setupControl = await createControlServer({ setup: { configured: false, missing }, port: controlPort });
+    console.error(`Gugu Habitat setup is incomplete. Fill ${envFile}.`);
+    console.info(`Setup page: http://127.0.0.1:${setupControl.address.port}`);
+    const shutdown = async () => {
+      await setupControl.close();
+      process.exit(0);
+    };
+    process.once('SIGINT', () => void shutdown());
+    process.once('SIGTERM', () => void shutdown());
+  }
 }
