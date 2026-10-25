@@ -1,0 +1,27 @@
+{
+  "name": "gugu-habitat",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "A local-first AI companion with persistent memory and pluggable channels.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nonggde/gugu-habitat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nonggde/gugu-habitat/issues"
+  },
+  "homepage": "https://github.com/nonggde/gugu-habitat#readme",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node src/main.mjs",
+    "test": "node --test",
+    "check": "node --check src/main.mjs && node --test"
+  },
+  "dependencies": {
+    "@tencent-connect/qqbot-nodejs": "^1.0.4"
+  }
+}

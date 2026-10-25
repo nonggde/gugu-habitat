@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+node_modules/
+data/
+*.sqlite
+*.sqlite-*
+*.db
+browser-profile/
+playwright-report/
+coverage/
+dist/
+.DS_Store
